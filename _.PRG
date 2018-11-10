@@ -106,7 +106,7 @@ Procedure Init( __otarget__ )
 Procedure this_access( pname As String )
 *---------------------------------------------
 
-	If Lower(m.pname) $  '__apush__,__otarget__,__lastproperty__,newitemfor,newlist,newcollection,additems,__acache__,__passitems__,__copycache__'
+	If Lower(','+m.pname+',') $  ',__apush__,__otarget__,__lastproperty__,newitemfor,newlist,newcollection,additems,__acache__,__passitems__,__copycache__,'
 		Return This
 	Endif
 
