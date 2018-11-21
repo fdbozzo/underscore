@@ -1,12 +1,12 @@
 **************************************************************
-*
 * Marco Plaza, 2018
 * @nfoxProject, http://www.noVfp.com
 * nfTools https://github.com/nfTools
-*
+* rev: 20181117:T12:00:00
+* rev: 20181120:T22:00:00 
 *************************************************************
 *
-* usage ( see _sample.prg )
+* usage ( see _test.prg )
 *
 *
 * with _( object , [ cNewPropertyName ] )
@@ -48,12 +48,12 @@ Try
 
 	Do Case
 
-	Case Vartype(__otarget__) # 'O'
+	Case type('__otarget__',1) = 'A' or vartype(__otarget__) # 'O'
 		Error 'nfTools: Invalid parameter type - must supply an object '+Chr(13)
 		result = .Null.
 
 
-	Case Pcount() = 2 And Vartype(m.newpropname ) = 'C'
+	Case Pcount() = 2 And Vartype( m.newpropname ) = 'C'
 
 		tact = Type( '__oTarget__.'+newpropname )
 
@@ -106,7 +106,19 @@ Procedure Init( __otarget__ )
 Procedure this_access( pname As String )
 *---------------------------------------------
 
-	If Lower(','+m.pname+',') $  ',__apush__,__otarget__,__lastproperty__,newitemfor,newlist,newcollection,additems,__acache__,__passitems__,__copycache__,'
+	If inlist(Lower(m.pname),;
+	'additems',;
+	'newcollection',;
+	'newitemfor',;
+	'newlist',;
+	'__apush__',;
+	'__copycache__',;
+	'__otarget__',;
+	'__lastproperty__',;
+	'__acache__',;
+	'__passitems__';
+	)
+	
 		Return This
 	Endif
 
@@ -126,6 +138,8 @@ Procedure this_access( pname As String )
 Function additems( pname, p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *---------------------------------------
 
+	local ot,nn,isarray
+	
 	If Not Type( 'this.__oTarget__.'+m.pname,1) $ 'C,A'
 		Error  pname + ' is not a Collection / Array '
 	Endif
@@ -149,10 +163,12 @@ Function additems( pname, p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16
 Function newitemfor( pname , Key )
 *---------------------------------------
 
+	local ot,tvar,onew
+
 	If Type('pName') # 'C'
 		Error ' newItemFor() invalid parameter Type '+calledfrom()
 	Endif
-
+	
 	ot = This.__otarget__
 
 	tvar = Type( 'oT.'+m.pname , 1 )
@@ -182,7 +198,7 @@ Function newitemfor( pname , Key )
 	Otherwise
 
 
-		Error pname + ' is not a Collection / Array ' &&+calledfrom()
+		Error m.pname + ' is not a Collection / Array ' 
 
 	Endcase
 
@@ -190,7 +206,8 @@ Function newitemfor( pname , Key )
 *-------------------------------------------------------------------------------------------------------
 	Procedure newlist( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *-------------------------------------------------------------------------------------------------------
-
+	local ot,lp,np
+	
 	ot = This.__otarget__
 	lp = This.__lastproperty__
 	Removeproperty(m.ot,m.lp)
@@ -219,12 +236,15 @@ Function newitemfor( pname , Key )
 *------------------------------------------
 	Procedure __copycache__
 *------------------------------------------
+
 	If !This.__passitems__
 		Return
 	Endif
 
 	This.__passitems__ = .F.
 
+	local aname
+	
 	aname = This.__lastproperty__
 	Acopy( This.__acache__,This.__otarget__.&aname )
 	This.__acache__ = .Null.
@@ -233,7 +253,8 @@ Function newitemfor( pname , Key )
 	Procedure newcollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *--------------------------------------
 
-	Local ocol
+	Local ocol,nn
+	
 	ocol = Createobject('collection')
 
 	For nn = 1 To Pcount()
@@ -248,6 +269,7 @@ Function newitemfor( pname , Key )
 *-----------------------------------------
 Function __apush__( o, pname , vvalue )
 *-----------------------------------------
+local uel
 
 uel = Alen( m.o.&pname )
 
