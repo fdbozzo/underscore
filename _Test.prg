@@ -30,6 +30,8 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 
 		.SPECS = .newCollection()
 		
+		.specs.add('First Item with key','testKey1')  && normal collection add()
+		
 		with .newItemFor('specs','memory')
 			.type = 'DDR4'
 			.MAXSIZE = '64GB'
@@ -68,12 +70,28 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 
 endwith
 
-clear
+? "oMypc.motherboard.power[1]:"
+?? oMypc.motherboard.power[1]
 
-? oMypc.motherboard.power[1]
-? oMypc.storage[1].connectivity
-? omypc.motherboard.specs('memory').maxsize
-? omypc.motherboard.specs('memory').slots
-? omypc.motherboard.specs('usb').front
+? "omypc.motherboard.specs('memory').maxsize:"
+?? omypc.motherboard.specs('memory').maxsize
 
+** beta:
+
+public oCust
+
+oCust = e()
+
+with _( m.oCust  )
+
+	with _(.info, '.address.billing.phone')
+
+		.number = 2358811
+
+	endwith
+	
+endwith
+
+? 'm.oCust.info.address.billing.phone.number:'
+?? m.oCust.info.address.billing.phone.number
 
