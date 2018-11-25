@@ -7,8 +7,7 @@
 * ver: 20181125:T13:00:00
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
-* You are free to use, modify and include it in your compiled projects to support 
-* internal procedures. Any other use is not allowed without permission  of the author.
+* You are free to use, modify and include it in your compiled projects.
 ****************************************************************************************
 *
 * usage ( see _test.prg )
