@@ -76,19 +76,29 @@ endwith
 ? "omypc.motherboard.specs('memory').maxsize:"
 ?? omypc.motherboard.specs('memory').maxsize
 
-** beta:
+
+*----------------------------------------------
+* Create a deep object at once:
+* Crear un objeto profundo de una vez:
+*----------------------------------------------
+*
+* instead of / en lugar de:
+*
+* oCust = create('empty')
+* addproperty(oCust,'oInfo',create('empty')
+* addproperty(oCust.oInfo,'address',create('empty')
+* addproperty(oCust.oInfo.address.billing,'phone',create('empty')
+* oCust.oInfo.address.billing.phone = 2358811
+*
+*-----------------------------------------------
 
 public oCust
 
-oCust = e()
+oCust = createObject('empty')
 
-with _( m.oCust  )
-
-	with _(.info, '.address.billing.phone')
+with _( m.oCust ,'.info.address.billing.phone')
 
 		.number = 2358811
-
-	endwith
 	
 endwith
 
