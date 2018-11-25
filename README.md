@@ -11,12 +11,12 @@ Check and run \_test.prg
 
 Construya y Modele objetos complejos de Visual Foxpro agregando propiedades, listas y colecciones de manera fácil.  
 Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience a usarlo.  
-Chequee y ejecute \_test.prg 
+
 <a href='#es'> Uso <a>
 
 **********************************
 <a id='en'></a>
-## Usage: ( see \_test.prg )
+## Usage: ( see <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
 
 ```
 
@@ -71,12 +71,12 @@ Chequee y ejecute \_test.prg
 **************************************************************
 
 <a id='es'></a>
-##  Uso ( Ver \_test.prg )
+##  Uso ( ver <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
 
 ```
 
 * Object = el objeto base con el que desea trabajar
-* Optional cNewObjectParentPath agregará objetos secundarios a Objeto y establecerá el alcance al último objeto"
+* Opcional: cNewObjectParentPath agregará objetos secundarios a Objeto y establecerá el alcance al último objeto"
 
  with _( m.object , [ cNewObjectParentPath ] )  
 
