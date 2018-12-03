@@ -83,6 +83,16 @@ define class nfset as custom
    __passitems__ = .f.
    dimension __acache__(1)
 
+
+*------------------------------------------
+   procedure error( nerror, cmethod, nline )
+*------------------------------------------
+   if m.nerror # 1098
+      error 'Underscore error '+transform(m.nerror)+' Line '+transform(m.nline)+': '+message()
+   else
+      error 'Underscore: '+message()
+   endif
+
 *----------------------------------------
    procedure init( __otarget__ )
 *----------------------------------------
@@ -156,7 +166,7 @@ define class nfset as custom
    local ot,tvar,onew
 
    if type('pName') # 'C'
-      error ' newItemFor() invalid parameter Type '+calledfrom()
+      error ' newItemFor() invalid parameter Type '
    endif
 
    ot = this.__otarget__
