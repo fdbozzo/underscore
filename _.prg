@@ -62,8 +62,6 @@ try
 
 catch to oerr
 
-   emessage = emessage( oerr)
-
 
 endtry
 
@@ -290,6 +288,8 @@ function createchildsfor( osrc , cchildspath )
 *------------------------------------------------------
 
 local vtype,thispath,thiso,cchildspath
+private oo
+
 
 cchildspath =  alltrim( m.cchildspath,1,'.',' ' )
 
