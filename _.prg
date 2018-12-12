@@ -62,6 +62,7 @@ try
 
 catch to oerr
 
+   emessage = m.oerr.message
 
 endtry
 
