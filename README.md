@@ -42,7 +42,7 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 
 	 .myCollection = .newCollection( [Item1,Item2,... Item20 ]) 
 
-*create a quick one dimensional array
+*create a quick list ( one dimension array )
 *optionally you can pass up to 20 items at once as parameters
 
 	 .myList = .newList( [ Item1,Item2,... Item20 ] ) 
