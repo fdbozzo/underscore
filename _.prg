@@ -5,6 +5,7 @@
 * ver: 20181117:T12:00:00
 * ver: 20181120:T22:00:00
 * ver: 20181125:T13:00:00
+* ver: 20181211:T21:00:00
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
 * You are free to use, modify and include it in your compiled projects.
