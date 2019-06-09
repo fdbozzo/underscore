@@ -1,5 +1,24 @@
-
 Public omypc && check later on your debugger
+
+*************************************************************
+* using _ instead of addproperty() allows you add 
+* arrays and create deep structures at once. 
+* even copy arrays to object property 
+*************************************************************
+
+ adir(filesList)
+ ofiles = create('empty')
+ _( m.oFiles,"one.two.myFiles",@fileslist )
+ ? oFiles.one.two.myFiles(1,1)
+
+ ofiles2 = create('empty')
+ _( oFiles, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles.thesame.in.other.node(1,1)
+
+
+*****************************************************
+* adding properties to existing objects:
+*****************************************************
 
 omypc = Createobject('empty')
 
@@ -18,6 +37,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 		.clockspeed = 4.3
 		.processorcount = 8
 	Endwith
+
 
 	With _(.motherboard)
 
@@ -76,20 +96,6 @@ endwith
 ? "omypc.motherboard.specs('memory').maxsize:"
 ?? omypc.motherboard.specs('memory').maxsize
 
-
-*----------------------------------------------
-* Create a deep object at once:
-* Crear un objeto profundo de una vez:
-*----------------------------------------------
-*
-* instead of / en lugar de:
-*
-* oCust = create('empty')
-* addproperty(oCust,'oInfo',create('empty')
-* addproperty(oCust.oInfo,'address',create('empty')
-* addproperty(oCust.oInfo.address.billing,'phone',create('empty')
-* oCust.oInfo.address.billing.phone = 2358811
-*
 *-----------------------------------------------
 
 public oCust
@@ -98,10 +104,12 @@ oCust = createObject('empty')
 
 with _( m.oCust ,'.info.address.billing.phone')
 
-		.number = 2358811
+	.number = 2358811
 	
 endwith
 
 ? 'm.oCust.info.address.billing.phone.number:'
 ?? m.oCust.info.address.billing.phone.number
+
+
 

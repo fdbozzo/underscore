@@ -2,14 +2,12 @@
 * Author: Marco Plaza, 2018
 * @nfoxProject, http://www.noVfp.com
 * nfTools https://github.com/nfTools
-* ver: 20181117:T12:00:00
-* ver: 20181120:T22:00:00
-* ver: 20181125:T13:00:00
-* ver: 20181211:T21:00:00
+* ver 1.1.0
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
 * You are free to use, modify and include it in your compiled projects.
 ****************************************************************************************
+* Parameters __otarget__[, cnewobjectparentpath[, newPropertyValue[, cArrayPath]]]
 *
 * usage ( see _test.prg )
 *
@@ -42,288 +40,350 @@
 *
 * endwith
 *
+* using _ instead of addproperty() allows you add arrays 
+* and create deep strctures at once:
+* to pass arrays by reference, or object,arrayPath
+*
+* adir(filesList)
+* ofiles = create('empty')
+* _( m.oFiles,"one.two.myFiles",@fileslist )
+* ? oFiles.one.two.myFiles(1,1)
+*
+* ofiles2 = create('empty')
+* _( oFiles, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+* ? oFiles.thesame.in.other.node(1,1)
 *
 **************************************************************
-parameters __otarget__, cnewobjectparentpath
+Parameters __otarget__, cnewobjectparentpath, newPropertyValue, cArrayPath
 
-local emessage,oparent,result,onewobject
+Local emessage,oObserver
 
-try
-   emessage = ''
 
-   if vartype(__otarget__) # 'O'
-      error 'nfTools: Invalid parameter type - must supply an object '+chr(13)
-   endif
+Try
 
-   if vartype(m.cnewobjectparentpath) = 'C'
-      __otarget__ = createchildsfor( __otarget__ , m.cnewobjectparentpath )
-   endif
+	emessage = ''
+	oObserver = .Null.
 
-   result = createobject('nfset', m.__otarget__  )
+	If Vartype(__otarget__) # 'O'
+		Error 'nfTools: Invalid parameter type - must supply an object '+Chr(13)
+	Endif
 
-catch to oerr
+	If Vartype(m.cnewobjectparentpath) = 'C'
 
-   emessage = m.oerr.message
+		If Pcount() = 2
+			newPropertyValue = Createobject('empty')
+		Endif
 
-endtry
+		If Pcount() = 4
+			
+			cArrayPath = ltrim(m.cArrayPath,1,'.')
+			
+			If aPathisValid( m.newPropertyValue, m.cArrayPath) 
+				cArrayPath = '.'+m.cArrayPath
+			else
+				Error 'invalid object.arrayPath '
+			Endif
+		Else
+			cArrayPath = ''
+		Endif
 
-if !empty(m.emessage)
-   error m.emessage
-   return .null.
-endif
+		Do createchildsfor With  __otarget__ , m.cnewobjectparentpath, newPropertyValue,cArrayPath
 
-return m.result
+	Endif
 
+	oObserver = Createobject('nfset', m.__otarget__  )
+
+
+Catch To oerr
+
+	emessage = oerr.message()
+
+Endtry
+
+
+If !Empty(m.emessage)
+	Error m.emessage
+	Return .Null. && prevent retry/ignore
+Else
+	Return m.oObserver
+Endif
 
 ******************************************
-define class nfset as custom
+Define Class nfset As Custom
 ******************************************
-   __otarget__ = .f.
-   __lastproperty__ = ''
-   __passitems__ = .f.
-   dimension __acache__(1)
+	__otarget__ = .F.
+	__lastproperty__ = ''
+	__passitems__ = .F.
+	Dimension __atemp__(1)
 
 
 *------------------------------------------
-   procedure error( nerror, cmethod, nline )
+	Procedure Error( nerror, cmethod, nline )
 *------------------------------------------
-   if m.nerror # 1098
-      error 'Underscore error '+transform(m.nerror)+' Line '+transform(m.nline)+': '+message()
-   else
-      error 'Underscore: '+message()
-   endif
+	If m.nerror # 1098
+		Error 'Underscore error '+Transform(m.nerror)+' Line '+Transform(m.nline)+': '+Message()
+	Else
+		Error 'Underscore: '+Message()
+	Endif
 
 *----------------------------------------
-   procedure init( __otarget__ )
+	Procedure Init( __otarget__ )
 *----------------------------------------
 
-   this.__otarget__ = m.__otarget__
+	This.__otarget__ = m.__otarget__
 
 
 *---------------------------------------------
-   procedure this_access( pname as string )
+	Procedure this_access( pname As String )
 *---------------------------------------------
 
-   if inlist(lower(m.pname),;
-         'additems',;
-         'newcollection',;
-         'newitemfor',;
-         'newlist',;
-         '__apush__',;
-         '__copycache__',;
-         '__otarget__',;
-         '__lastproperty__',;
-         '__acache__',;
-         '__passitems__',;
-         '__newobject__ ';
-         )
+	If Inlist(Lower(m.pname),;
+			'additems',;
+			'newcollection',;
+			'newitemfor',;
+			'newlist',;
+			'__apush__',;
+			'__copytemp__',;
+			'__otarget__',;
+			'__lastproperty__',;
+			'__atemp__',;
+			'__passitems__',;
+			'__newobject__ ';
+			)
 
-      return this
+		Return This
 
-   endif
+	Endif
 
-   this.__copycache__()
+	This.__copytemp__()
 
-   this.__lastproperty__ = m.pname
+	This.__lastproperty__ = m.pname
 
-   if !pemstatus(this.__otarget__,m.pname,5)
+	If !Pemstatus(This.__otarget__,m.pname,5)
 
-      addproperty( this.__otarget__, m.pname, createobject('empty') )
+		AddProperty( This.__otarget__, m.pname, Createobject('empty') )
 
-   endif
+	Endif
 
-   return this.__otarget__
-
-*---------------------------------------
-   function additems( pname, p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
-*---------------------------------------
-
-   local ot,nn,isarray
-
-   if not type( 'this.__oTarget__.'+m.pname,1) $ 'C,A'
-      error  pname + ' is not a Collection / Array '
-   endif
-
-   isarray = type( 'this.__oTarget__.'+m.pname,1) = 'A'
-
-   ot = this.__otarget__
-
-   for nn = 1 to pcount()-1
-
-      if m.isarray
-         this.__apush__( m.ot,m.pname, evaluate('p'+transform(m.nn)) )
-      else
-         m.ot.&pname..add( evaluate('p'+transform(m.nn)) )
-      endif
-
-   endfor
-
+	Return This.__otarget__
 
 *---------------------------------------
-   function newitemfor( pname , key )
+	Function additems( pname, p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *---------------------------------------
 
-   local ot,tvar,onew
+	Local ot,nn,isarray
 
-   if type('pName') # 'C'
-      error ' newItemFor() invalid parameter Type '
-   endif
+	If Not Type( 'this.__oTarget__.'+m.pname,1) $ 'C,A'
+		Error  pname + ' is not a Collection / Array '
+	Endif
 
-   ot = this.__otarget__
+	isarray = Type( 'this.__oTarget__.'+m.pname,1) = 'A'
 
-   tvar = type( 'oT.'+m.pname , 1 )
+	ot = This.__otarget__
 
-   do case
+	For nn = 1 To Pcount()-1
 
-   case m.tvar = 'C'
+		If m.isarray
+			This.__apush__( m.ot,m.pname, Evaluate('p'+Transform(m.nn)) )
+		Else
+			m.ot.&pname..Add( Evaluate('p'+Transform(m.nn)) )
+		Endif
 
-      onew = create('empty')
-
-      if pcount() = 2
-         m.ot.&pname..add( m.onew, m.key  )
-      else
-         m.ot.&pname..add( m.onew )
-      endif
-
-      return createobject( 'nfset' ,m.onew  )
-
-   case m.tvar = 'A'
-
-      onew = create('empty')
-
-      this.__apush__( m.ot,m.pname, m.onew )
-
-      return createobject('nfset',m.onew)
-
-   otherwise
+	Endfor
 
 
-      error m.pname + ' is not a Collection / Array '
+*---------------------------------------
+	Function newitemfor( pname , Key )
+*---------------------------------------
 
-   endcase
+	Local ot,tvar,onew
+
+	If Type('pName') # 'C'
+		Error ' newItemFor() invalid parameter Type '
+	Endif
+
+	ot = This.__otarget__
+
+	tvar = Type( 'oT.'+m.pname , 1 )
+
+	Do Case
+
+	Case m.tvar = 'C'
+
+		onew = Create('empty')
+
+		If Pcount() = 2
+			m.ot.&pname..Add( m.onew, m.key  )
+		Else
+			m.ot.&pname..Add( m.onew )
+		Endif
+
+		Return Createobject( 'nfset' ,m.onew  )
+
+	Case m.tvar = 'A'
+
+		onew = Create('empty')
+
+		This.__apush__( m.ot,m.pname, m.onew )
+
+		Return Createobject('nfset',m.onew)
+
+	Otherwise
+
+
+		Error m.pname + ' is not a Collection / Array '
+
+	Endcase
 
 
 *-------------------------------------------------------------------------------------------------------
-   procedure newlist( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
+	Procedure newlist( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *-------------------------------------------------------------------------------------------------------
-   local ot,lp,np
+	Local ot,lp,np
 
-   ot = this.__otarget__
-   lp = this.__lastproperty__
-   removeproperty(m.ot,m.lp)
-   addproperty(m.ot,m.lp+'(1)')
+	ot = This.__otarget__
+	lp = This.__lastproperty__
+	Removeproperty(m.ot,m.lp)
+	AddProperty(m.ot,m.lp+'(1)')
 
-   if pcount() > 0
-      dimension this.__acache__( pcount() )
-      for np = 1 to pcount()
-         this.__acache__(m.np) =  evaluate('p'+transform(m.np,'@b 99'))
-      endfor
-      this.__passitems__ = .t.
-   else
-      dimension this.__acache__(1)
-      this.__acache__(1) = .null.
-      this.__passitems__ = .f.
-   endif
+	If Pcount() > 0
+		Dimension This.__atemp__( Pcount() )
+		For np = 1 To Pcount()
+			This.__atemp__(m.np) =  Evaluate('p'+Transform(m.np))
+		Endfor
+		This.__passitems__ = .T.
+	Else
+		Dimension This.__atemp__(1)
+		This.__atemp__(1) = .Null.
+		This.__passitems__ = .F.
+	Endif
 
-   return .null.
+	Return .Null.
 
 *-------------------------------
-   procedure destroy
+	Procedure Destroy
 *-------------------------------
-   this.__copycache__()
+	This.__copytemp__()
 
 
 *------------------------------------------
-   procedure __copycache__
+	Procedure __copytemp__
 *------------------------------------------
 
-   if !this.__passitems__
-      return
-   endif
+	If !This.__passitems__
+		Return
+	Endif
 
-   this.__passitems__ = .f.
+	This.__passitems__ = .F.
 
-   local aname
+	Local aname
 
-   aname = this.__lastproperty__
-   acopy( this.__acache__,this.__otarget__.&aname )
-   this.__acache__ = .null.
+	aname = This.__lastproperty__
+	Acopy( This.__atemp__,This.__otarget__.&aname )
+	This.__atemp__ = .Null.
 
 *--------------------------------------
-   procedure newcollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
+	Procedure newcollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *--------------------------------------
 
-   local ocol,nn
+	Local ocol,nn
 
-   ocol = createobject('collection')
+	ocol = Createobject('collection')
 
-   for nn = 1 to pcount()
+	For nn = 1 To Pcount()
 
-      ocol.add(  evaluate('p'+transform(m.nn,'@b 99') ))
+		ocol.Add(  Evaluate('p'+Transform(m.nn) ))
 
-   endfor
+	Endfor
 
-   return m.ocol
+	Return m.ocol
 
 
 *-----------------------------------------
-   function __apush__( o, pname , vvalue )
+	Function __apush__( o, pname , vvalue )
 *-----------------------------------------
-   local uel
+	Local uel
 
-   uel = alen( m.o.&pname )
+	uel = Alen( m.o.&pname )
 
-   if !isnull( m.o.&pname )
-      m.uel = m.uel+1
-      dimension m.o.&pname( m.uel )
-   endif
+	If !Isnull( m.o.&pname )
+		m.uel = m.uel+1
+		Dimension m.o.&pname( m.uel )
+	Endif
 
-   m.o.&pname( m.uel ) =  m.vvalue
+	m.o.&pname( m.uel ) =  m.vvalue
 
 
 **********************************************
-enddefine
+Enddefine
 **********************************************
 
-*------------------------------------------------------
-function createchildsfor( osrc , cchildspath )
-*------------------------------------------------------
+*------------------------------------------------------------------------
+Function createchildsfor( THISO , cchildspath , vNewvalue , cArrayPath )
+*------------------------------------------------------------------------
 
-local vtype,thispath,thiso,cchildspath
-private oo
+private all
 
+cchildspath =  Alltrim( m.cchildspath,1,'.',' ' )
 
-cchildspath =  alltrim( m.cchildspath,1,'.',' ' )
+nLevels = Alines(oo,m.cchildspath,.F.,'.')
 
-alines(oo,m.cchildspath,.f.,'.')
-
-m.thiso = m.osrc
 thispath = ''
 
-for each thischild in oo
+For nlevel = 1 To m.nLevels
 
-   vtype = type( 'm.thiso.'+m.thischild )
+	thisChild  = m.oo(m.nlevel)
 
-   thispath = m.thispath+'.'+m.thischild
+	vtype = Type( 'm.thiso.'+m.thisChild )
 
-   do case
-   case m.vtype = 'U'
+	thispath = m.thispath+'.'+m.thisChild
 
-      try
-         addproperty( m.thiso , m.thischild , createobject('empty') )
-         thiso  = m.thiso.&thischild
-      catch
-         error 'incorrect property Name: "'+m.thischild+'" in '+m.thispath
-      endtry
+	islastChild = nlevel = m.nLevels
+
+	If m.islastChild  And m.vtype # 'U'
+		Removeproperty(m.THISO,m.thisChild)
+		vtype = 'U'
+	Endif
+
+	Do Case
+
+	Case m.vtype = 'U'
+
+		Try
+
+			If !m.islastChild
+
+				AddProperty( m.THISO , m.thisChild , Createobject('empty') )
+
+			Else
+
+				If Type("m.vNewValue&cArraypath",1) = 'A'
+
+					AddProperty(m.THISO,m.thisChild+'(1)',.Null.)
+					Acopy(vNewvalue&cArrayPath,m.THISO.&thisChild)
+
+				Else
+
+					AddProperty( m.THISO , m.thisChild , m.vNewvalue )
+
+				Endif
+
+			Endif
 
 
-   case m.vtype # 'O' or type( 'm.thiso.'+m.thischild ,1 ) = 'A'
-      error m.thispath+' is not an object'
+		Catch
 
-   endcase
+			Error 'incorrect property Name: "'+m.thisChild+'" in '+m.thispath
 
-endfor
+		Endtry
 
-return m.thiso
+	Case !m.islastChild And  m.vtype # 'O'
+		Error m.thispath+' is not an object'
 
-*----------------------------------------------------------------
+	Endcase
+
+	THISO  = m.THISO.&thisChild
+
+Endfor
+
+
