@@ -12,8 +12,8 @@ Public omypc && check later on your debugger
  ? oFiles.one.two.myFiles(1,1)
 
  ofiles2 = create('empty')
- _( oFiles, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
- ? oFiles.thesame.in.other.node(1,1)
+ _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles2.thesame.in.other.node(1,1)
 
 
 *****************************************************
