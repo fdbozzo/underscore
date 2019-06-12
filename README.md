@@ -16,11 +16,25 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 ## Usage: ( see <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
 
 ```
+using _ as replacement for addproperty() allows you to quickly copy arrays to objects, and create deep structures in on step
+
+*passing arrays by reference: 
+adir(filesList)
+ofiles = create('empty')
+_( m.oFiles,"one.two.myFiles",@fileslist )
+? oFiles.one.two.myFiles(1,1)
+
+*passing array from one object to another:
+ ofiles2 = create('empty')
+ _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles2.thesame.in.other.node(1,1)
+
+
 
 *Object = base object you wish to work with
-*Optional cNewObjectParentPath will add child objects to Object and set scope to the last child"
+*Optional cNewObjectPath will add child objects to Object and set scope to the last child"
 
- with _( m.object , [ cNewObjectParentPath ] )  
+ with _( m.object , [ cNewObjectPath ] )  
 
 * any previously unexistent property will be created on the fly
 * same as addproperty( object, 'property1', any valid vfp expression )
@@ -31,7 +45,7 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 *adds a &ltnewObjectName&gt dynamic object to current object in scope of with .. endwith
 *Optional cNewObjectParentPath will create child objects of parent Object as parents for \<newObjectpropertyName\>
 
-	with _( .newObjectName [,cNewObjectParentPath] )  
+	with _( .newObjectName [,cNewObjectPath] )  
 		.newObjProperty1 =  any valid vfp expression
 		.newObjProperty2 =  any valid vfp expression
 
@@ -71,11 +85,24 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 ##  Uso ( ver <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
 
 ```
+usar  _ como reemplazo de addproperty() le permite rápidamente
+copiar arrays a objetos y crear estructuras profundas en un solo paso:
 
+*pasando arrays por referencia:
+adir(filesList)
+ofiles = create('empty')
+_( m.oFiles,"one.two.myFiles",@fileslist )
+? oFiles.one.two.myFiles(1,1)
+
+*pasando arrays de un objeto a otro:
+ ofiles2 = create('empty')
+ _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles2.thesame.in.other.node(1,1)
+ 
 * Object = el objeto base con el que desea trabajar
-* Opcional: cNewObjectParentPath agregará objetos secundarios a Objeto y establecerá el alcance al último objeto"
+* Opcional: cNewObjectPath agregará objetos secundarios a Objeto y establecerá el alcance al último objeto"
 
- with _( m.object , [ cNewObjectParentPath ] )  
+ with _( m.object , [ cNewObjectPath ] )  
 
 * cualquier propiedad previamente inexistente se creará al vuelo 
 * igual que hacer " addproperty(objeto, 'property1', cualquier expresión vfp válida) "
@@ -86,7 +113,7 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 * agrega un objeto dinámico \<newObjectName\> al objeto actual y lo coloca como alcance para with .. endwith \>
 * Opcional: cNewObjectParentPath creará objetos secundarios del objeto primario y establecerá el alcance al último objeto 
 
-	with _( .newObjectName [,cNewObjectParentPath] )  
+	with _( .newObjectName [,cNewObjectPath] )  
 		.newObjProperty1 =  any valid vfp expression
 		.newObjProperty2 =  any valid vfp expression
 
