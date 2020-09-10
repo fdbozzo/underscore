@@ -117,15 +117,6 @@ Define Class nfset As Custom
 	Dimension __atemp__(1)
 
 
-*------------------------------------------
-	Procedure Error( nerror, cmethod, nline )
-*------------------------------------------
-	If m.nerror # 1098
-		Error 'Underscore error '+Transform(m.nerror)+' Line '+Transform(m.nline)+': '+Message()
-	Else
-		Error 'Underscore: '+Message()
-	Endif
-
 *----------------------------------------
 	Procedure Init( __otarget__ )
 *----------------------------------------
