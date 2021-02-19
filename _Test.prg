@@ -1,28 +1,24 @@
-Public omypc && check later on your debugger
-
-*************************************************************
-* using _ instead of addproperty() allows you add 
-* arrays and create deep structures at once. 
-* even copy arrays to object property 
-*************************************************************
-
- adir(filesList)
- ofiles = create('empty')
- _( m.oFiles,"one.two.myFiles",@fileslist )
- ? oFiles.one.two.myFiles(1,1)
-
- ofiles2 = create('empty')
- _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
- ? oFiles2.thesame.in.other.node(1,1)
-
-
 *****************************************************
 * adding properties to existing objects:
 *****************************************************
 
+public oCust, oMyPc
+
+oCust = createObject('empty')
+
+with _( m.oCust ,'.info.address.billing.phone')
+
+	.number = 2358811
+	
+endwith
+
+? 'm.oCust.info.address.billing.phone.number:'
+?? m.oCust.info.address.billing.phone.number
+
+
 omypc = Createobject('empty')
 
-With _( omypc )  && simply pass object you want to modify, any referenced property will be added to passed object if does not exist:
+With _( omypc )  && simply pass object you want to modify, any non-existent property will be added if does not exist:
 
 	.madeby = 'Marco Plaza, 2018 - nfTools'
 	.manufacturer = 'custom'
@@ -30,7 +26,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 	.casetype  = 'ATX'
 	.modelname = 'Ryzen Performance Plus'
 
-	With _( .cpu )   && cpu will be a new object for oMyPc - check we pass ".cpu"  ( dot cpu ) because it's inside with - endwith
+	With _( .cpu )   &&  ( oMyPc.cpu  ) 
 		.processorcount = 6
 		.brand = 'AMD'
 		.model = 'Ryzen 7'
@@ -39,7 +35,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 	Endwith
 
 
-	With _(.motherboard)
+	With _(.motherboard) && ( oMypc.motherboard )
 
 		.manufacturer = 'Asus'
 		.model = 'Prime B350-Plus AMD'
@@ -52,7 +48,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 		
 		.specs.add('First Item with key','testKey1')  && normal collection add()
 		
-		with .newItem('specs','memory')
+		with .newItem('specs','memory') && oMypc.motherboard.specs
 			.type = 'DDR4'
 			.MAXSIZE = '64GB'
 			.slots = 4
@@ -67,9 +63,9 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 
 	Endwith
 
-	.storage = .newList()
+	.storage = .newList() && simple one dimension array
 	
-	with .newItem( 'storage' )  && adding objects to list
+	with .newItem( 'storage' )  && adding objects to storage list
 		.manufacturer = 'Samsung'
 		.model = '960 evo Series'
 		.Type = 'internal'
@@ -96,20 +92,20 @@ endwith
 ? "omypc.motherboard.specs('memory').maxsize:"
 ?? omypc.motherboard.specs('memory').maxsize
 
-*-----------------------------------------------
-
-public oCust
-
-oCust = createObject('empty')
-
-with _( m.oCust ,'.info.address.billing.phone')
-
-	.number = 2358811
-	
-endwith
-
-? 'm.oCust.info.address.billing.phone.number:'
-?? m.oCust.info.address.billing.phone.number
+? "omypc.motherboard.specs('usb').internal:"
+?? omypc.motherboard.specs('usb').internal
 
 
+*************************************************************
+* arrays and create deep structures at once. 
+* copy arrays to object property 
+*************************************************************
 
+ adir(filesList)
+ ofiles = create('empty')
+ _( m.oFiles,"one.two.myFiles",@fileslist )
+ ? oFiles.one.two.myFiles(1,1)
+
+ ofiles2 = create('empty')
+ _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles2.thesame.in.other.node(1,1)

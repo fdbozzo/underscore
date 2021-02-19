@@ -16,133 +16,119 @@ Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience 
 ## Usage: ( see <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
 
 ```
-using _ as replacement for addproperty() allows you to quickly copy arrays to objects, and create deep structures in on step
+*****************************************************
+* adding properties to existing objects:
+*****************************************************
 
-*passing arrays by reference: 
-adir(filesList)
-ofiles = create('empty')
-_( m.oFiles,"one.two.myFiles",@fileslist )
-? oFiles.one.two.myFiles(1,1)
+public oCust, oMyPc
 
-*passing array from one object to another:
- ofiles2 = create('empty')
- _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
- ? oFiles2.thesame.in.other.node(1,1)
+oCust = createObject('empty')
 
+with _( m.oCust ,'.info.address.billing.phone')
 
-
-*Object = base object you wish to work with
-*Optional cNewObjectPath will add child objects to Object and set scope to the last child"
-
- with _( m.object , [ cNewObjectPath ] )  
-
-* any previously unexistent property will be created on the fly
-* same as addproperty( object, 'property1', any valid vfp expression )
-
-	.property1 = any valid vfp expression
-	.property2 = any valid vfp expression
-
-*adds a &ltnewObjectName&gt dynamic object to current object in scope of with .. endwith
-*Optional cNewObjectParentPath will create child objects of parent Object as parents for \<newObjectpropertyName\>
-
-	with _( .newObjectName [,cNewObjectPath] )  
-		.newObjProperty1 =  any valid vfp expression
-		.newObjProperty2 =  any valid vfp expression
-
-	endwith
-
-*create a quick keyless collection
-*optionally you pass up to 20 items at once as parameters
-
-	 .myCollection = .newCollection( [Item1,Item2,... Item20 ]) 
-
-*create a quick list ( one dimension array )
-*optionally you can pass up to 20 items at once as parameters
-
-	 .myList = .newList( [ Item1,Item2,... Item20 ] ) 
-
-*quickly add up to 20 items to array/ keyless collection:
-
-	 .additems( "keylessCollectionName │ arrayName" , item1,item2,.. item20 ) 
-
-*add a dynamic object to array or collection & optional collection item key
-
-	 with .newItemFor("< collectionName │ arrayName >" [, collectionItemkey] )
-
-		.itemproperty1 = any valid vfp expression
-		.itemproperty2 = any valid vfp expression
-
-	 endwith
-
- endwith
-```
-
-
-
-**************************************************************
-
-<a id='es'></a>
-##  Uso ( ver <a href='https://github.com/nftools/underscore/blob/master/_Test.prg'> \_test.prg </a>)
-
-```
-usar  _ como reemplazo de addproperty() le permite rápidamente
-copiar arrays a objetos y crear estructuras profundas en un solo paso:
-
-*pasando arrays por referencia:
-adir(filesList)
-ofiles = create('empty')
-_( m.oFiles,"one.two.myFiles",@fileslist )
-? oFiles.one.two.myFiles(1,1)
-
-*pasando arrays de un objeto a otro:
- ofiles2 = create('empty')
- _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
- ? oFiles2.thesame.in.other.node(1,1)
- 
-* Object = el objeto base con el que desea trabajar
-* Opcional: cNewObjectPath agregará objetos secundarios a Objeto y establecerá el alcance al último objeto"
-
- with _( m.object , [ cNewObjectPath ] )  
-
-* cualquier propiedad previamente inexistente se creará al vuelo 
-* igual que hacer " addproperty(objeto, 'property1', cualquier expresión vfp válida) "
-
-	.property1 = any valid vfp expression
-	.property2 = any valid vfp expression
-
-* agrega un objeto dinámico \<newObjectName\> al objeto actual y lo coloca como alcance para with .. endwith \>
-* Opcional: cNewObjectParentPath creará objetos secundarios del objeto primario y establecerá el alcance al último objeto 
-
-	with _( .newObjectName [,cNewObjectPath] )  
-		.newObjProperty1 =  any valid vfp expression
-		.newObjProperty2 =  any valid vfp expression
-
-	endwith 
+	.number = 2358811
 	
-* crea una colección rápida sin llave  
-* opcionalmente puede pasar hasta 20 elementos a la vez como parámetros para ser añadidos a la colección
+endwith
 
-	 .myCollection = .newCollection( [Item1,Item2,... Item20 ]) 
+? 'm.oCust.info.address.billing.phone.number:'
+?? m.oCust.info.address.billing.phone.number
 
-* crea un array unidimensional ( lista ) rápida  
-* opcionalmente puede pasar hasta 20 elementos a la vez como parámetros para ser añadidos a la lista 
 
-	 .myList = .newList( [ Item1,Item2,... Item20 ] ) 
+omypc = Createobject('empty')
 
-* agrega rápidamente hasta 20 elementos a la colección sin llave o lista: 
+With _( omypc )  && simply pass object you want to modify, any non-existent property will be added if does not exist:
 
-	 .additems( "keylessCollectionName │ arrayName" , item1,item2,.. item20 ) 
+	.madeby = 'Marco Plaza, 2018 - nfTools'
+	.manufacturer = 'custom'
+	.baseprice = 699
+	.casetype  = 'ATX'
+	.modelname = 'Ryzen Performance Plus'
 
-* agregar un objeto dinámico a la lista o colección y opcionalmente una clave del elemento de la colección 
+	With _( .cpu )   &&  ( oMyPc.cpu  ) 
+		.processorcount = 6
+		.brand = 'AMD'
+		.model = 'Ryzen 7'
+		.clockspeed = 4.3
+		.processorcount = 8
+	Endwith
 
-	 with .newItemFor("< collectionName │ arrayName >" [, collectionItemkey] )
 
-		.itemproperty1 = any valid vfp expression
-		.itemproperty2 = any valid vfp expression
+	With _(.motherboard) && ( oMypc.motherboard )
 
-	 endwith
+		.manufacturer = 'Asus'
+		.model = 'Prime B350-Plus AMD'
+		.formfactor = 'ATX'
+		.cpusocket = 'AM4'
 
- endwith
+		.power = .newList('CPU','CASE1','CASE2','CASE3')  && creating a list with 4 items
+
+		.SPECS = .newCollection()
+		
+		.specs.add('First Item with key','testKey1')  && normal collection add()
+		
+		with .newItem('specs','memory') && oMypc.motherboard.specs
+			.type = 'DDR4'
+			.MAXSIZE = '64GB'
+			.slots = 4
+		endwith
+		
+		with .newItem('specs','usb')
+			.internal = '3 @ PCIe 3.0 x2'
+			.front = 'x1 Type-C'
+			.rear  = 'x2 Type-A'
+		endwith
+		
+
+	Endwith
+
+	.storage = .newList() && simple one dimension array
+	
+	with .newItem( 'storage' )  && adding objects to storage list
+		.manufacturer = 'Samsung'
+		.model = '960 evo Series'
+		.Type = 'internal'
+		.connectivity = 'PCIe NVMe M.2'
+		.capacity = '250gb'
+	Endwith
+
+	with .newItem( 'storage' )
+		.manufacturer = 'Seagate'
+		.model = 'Barracuda ST3000DM008'
+		.Type = 'Internal'
+		.formfactor = 3.5
+		.capacity = '3tb'
+		.connectivity = 'Sata 6.0'
+		.rotationspeed = 7200
+	Endwith
+
+
+endwith
+
+? "oMypc.motherboard.power[1]:"
+?? oMypc.motherboard.power[1]
+
+? "omypc.motherboard.specs('memory').maxsize:"
+?? omypc.motherboard.specs('memory').maxsize
+
+? "omypc.motherboard.specs('usb').internal:"
+?? omypc.motherboard.specs('usb').internal
+
+
+*************************************************************
+* arrays and create deep structures at once. 
+* copy arrays to object property 
+*************************************************************
+
+ adir(filesList)
+ ofiles = create('empty')
+ _( m.oFiles,"one.two.myFiles",@fileslist )
+ ? oFiles.one.two.myFiles(1,1)
+
+ ofiles2 = create('empty')
+ _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+ ? oFiles2.thesame.in.other.node(1,1)
+
+
 ```
 
 
