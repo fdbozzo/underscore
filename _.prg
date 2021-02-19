@@ -97,7 +97,7 @@ Try
 
 Catch To oerr
 
-	emessage = nft_errorh( oerr)
+	emessage = 'underscore ("_.prg"): '+oerr.message
 
 Endtry
 
