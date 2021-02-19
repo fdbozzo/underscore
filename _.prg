@@ -2,35 +2,33 @@
 * Author: Marco Plaza, 2018
 * @nfoxProject, http://www.noVfp.com
 * nfTools https://github.com/nfTools
-* ver 1.1.0
+* ver 1.1.9
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
 * You are free to use, modify and include it in your compiled projects.
 ****************************************************************************************
-* Parameters __otarget__[, cnewobjectparentpath[, newPropertyValue[, cArrayPath]]]
+* Parameters __otarget__[, cnewobjectpath[, newPropertyValue[, cArrayPath]]]
 *
 * usage ( see _test.prg )
 *
 *
-* with _( object , [ cNewObjectParentPath ] )  && Object = base object you wish to work with; cNewObjectParentPath will add child objects to Object as parents for <newObjectpropertyName>
+* with _( object , [ cNewObjectpath ] )  && Object = base object you wish to work with; cNewObjectpath will add child objects to Object as parents for <newObjectpropertyName>
 *
 *	.property1 = any valid vfp expression
 *
 *	.property2 = any valid vfp expression
 *
-*	with _( .<newObjectPropertyName> [,cNewObjectParentPath] )  && adds a new dynamic object to current object; cNewObjectParentPath will create child objects of parent Object as parents for <newObjectpropertyName>
+*	with _( .<newObjectPropertyName> [,cNewObjectpath] )  && adds a new dynamic object to current object; cNewObjectpath will create child objects of parent Object as parents for <newObjectpropertyName>
 *		.newObjProperty1 = ...
 *		.newObjProperty2 = ...
 *
 *	endwith
 *
-*	 .myCollection = .newCollection( [Item1,Item2,... Item20 ]) && creates a quick key-less collection adding up to 20 items at once
-*
 *	 .myList = .newList( [ Item1,Item2,... Item20 ] ) && creates a one dimension array, optional items to add
 *
-*	 .additems( "< key-less collection / array name >" , item1,item2,.. item20 ) && adds multiple items to array/ key-less collection
+*	 .additems(  key-less collection name | array name , item1 [,item2,.. item20 ]) && adds multiple items to array/ key-less collection
 *
-*	 with .newItemFor("< collection/array name >" [, collectionItemkey] ) && construct and add objects to array or collection with optional key
+*	 with .newItem( collection name | array name  [, collectionItemkey] ) && construct and add objects to array or collection with optional key
 *
 *		.itemproperty1 = value
 *
@@ -40,7 +38,7 @@
 *
 * endwith
 *
-* using _ instead of addproperty() allows you add arrays 
+* using _ instead of addproperty() allows you add arrays
 * and create deep strctures at once:
 * to pass arrays by reference, or object,arrayPath
 *
@@ -50,62 +48,65 @@
 * ? oFiles.one.two.myFiles(1,1)
 *
 * ofiles2 = create('empty')
-* _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
-* ? oFiles2.thesame.in.other.node(1,1)
+* _( oFiles, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
+* ? oFiles.thesame.in.other.node(1,1)
 *
 **************************************************************
-Parameters __otarget__, cnewobjectparentpath, newPropertyValue, cArrayPath
+Lparameters __otarget__, cnewobjectpath, newpropertyvalue, carraypath
 
-Local emessage,oObserver
+Local emessage,oobserver
 
 
 Try
 
 	emessage = ''
-	oObserver = .Null.
+	oobserver = .Null.
+	carraypath = Evl(m.carraypath,'')
+
 
 	If Vartype(__otarget__) # 'O'
 		Error 'nfTools: Invalid parameter type - must supply an object '+Chr(13)
 	Endif
 
-	If Vartype(m.cnewobjectparentpath) = 'C'
+	If Vartype(m.cnewobjectpath) = 'C'
 
-		If Pcount() = 2
-			newPropertyValue = Createobject('empty')
-		Endif
 
-		If Pcount() = 4
-			
-			cArrayPath = ltrim(m.cArrayPath,1,'.')
-			
-			If aPathisValid( m.newPropertyValue, m.cArrayPath) 
-				cArrayPath = '.'+m.cArrayPath
-			else
+		Do Case
+		Case Pcount() = 2
+			newpropertyvalue = Createobject('empty')
+
+		Case Pcount() = 4
+
+			If Not aPathIsValid( m.newpropertyvalue, @carraypath )
 				Error 'invalid object.arrayPath '
 			Endif
-		Else
-			cArrayPath = ''
-		Endif
 
-		Do createchildsfor With  __otarget__ , m.cnewobjectparentpath, newPropertyValue,cArrayPath
+		Endcase
+
+		createchildfor( @__otarget__ , m.cnewobjectpath, @newpropertyvalue, m.carraypath )
 
 	Endif
 
-	oObserver = Createobject('nfset', m.__otarget__  )
+	If Pcount() < 3
+		oobserver = Createobject('nfset', m.__otarget__  )
+	Else
+		oobserver = .T.
+	Endif
+
 
 
 Catch To oerr
 
-	emessage = oerr.message()
+	emessage = nft_errorh( oerr)
 
 Endtry
 
 
 If !Empty(m.emessage)
 	Error m.emessage
-	Return .Null. && prevent retry/ignore
+	Return .Null.
 Else
-	Return m.oObserver
+	Return m.oobserver
 Endif
 
 ******************************************
@@ -131,7 +132,7 @@ Define Class nfset As Custom
 	If Inlist(Lower(m.pname),;
 			'additems',;
 			'newcollection',;
-			'newitemfor',;
+			'newitem',;
 			'newlist',;
 			'__apush__',;
 			'__copytemp__',;
@@ -183,48 +184,51 @@ Define Class nfset As Custom
 	Endfor
 
 
-*---------------------------------------
-	Function newitemfor( pname , Key )
-*---------------------------------------
+*-----------------------------------------
+	Function NewItem( pname , Key, Value )
+*-----------------------------------------
 
-	Local ot,tvar,onew
 
 	If Type('pName') # 'C'
-		Error ' newItemFor() invalid parameter Type '
+		Error ' newItem(): invalid collection / array name '
 	Endif
 
 	ot = This.__otarget__
 
 	tvar = Type( 'oT.'+m.pname , 1 )
 
+	If Pcount() # 3
+		NewItem = Create('empty')
+	Else
+		NewItem = m.value
+	Endif
+
 	Do Case
 
 	Case m.tvar = 'C'
 
-		onew = Create('empty')
-
-		If Pcount() = 2
-			m.ot.&pname..Add( m.onew, m.key  )
+		If Pcount() > 1
+			m.ot.&pname..Add( m.NewItem, m.key  )
 		Else
-			m.ot.&pname..Add( m.onew )
+			m.ot.&pname..Add( m.NewItem )
 		Endif
-
-		Return Createobject( 'nfset' ,m.onew  )
 
 	Case m.tvar = 'A'
 
-		onew = Create('empty')
-
-		This.__apush__( m.ot,m.pname, m.onew )
-
-		Return Createobject('nfset',m.onew)
+		This.__apush__( m.ot,m.pname, m.NewItem )
 
 	Otherwise
 
-
 		Error m.pname + ' is not a Collection / Array '
+		Return .Null.
 
 	Endcase
+
+	If Vartype(m.NewItem) = 'O'
+		Return Createobject('nfset',m.NewItem)
+	Else
+		Return .T.
+	Endif
 
 
 *-------------------------------------------------------------------------------------------------------
@@ -273,21 +277,6 @@ Define Class nfset As Custom
 	Acopy( This.__atemp__,This.__otarget__.&aname )
 	This.__atemp__ = .Null.
 
-*--------------------------------------
-	Procedure newcollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
-*--------------------------------------
-
-	Local ocol,nn
-
-	ocol = Createobject('collection')
-
-	For nn = 1 To Pcount()
-
-		ocol.Add(  Evaluate('p'+Transform(m.nn) ))
-
-	Endfor
-
-	Return m.ocol
 
 
 *-----------------------------------------
@@ -304,20 +293,42 @@ Define Class nfset As Custom
 
 	m.o.&pname( m.uel ) =  m.vvalue
 
+*--------------------------------------
+	Procedure newCollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
+*--------------------------------------
+
+	Local ocol,nn
+
+	ocol = Createobject('collection')
+
+	For nn = 1 To Pcount()
+
+		ocol.Add(  Evaluate('p'+Transform(m.nn) ))
+
+	Endfor
+
+	Return m.ocol
+
 
 **********************************************
 Enddefine
 **********************************************
 
 *------------------------------------------------------------------------
-Function createchildsfor( THISO , cchildspath , vNewvalue , cArrayPath )
+Function createchildfor( thiso , cChildPath , vnewvalue , carraypath )
 *------------------------------------------------------------------------
 
-private all
+Local nLevels
+Local thispath
+Local thisChild
+Local vtype
+Local islastChild
+Local nlevel
+Private oo
 
-cchildspath =  Alltrim( m.cchildspath,1,'.',' ' )
+cChildPath =  Alltrim( m.cChildPath,1,'.',' ' )
 
-nLevels = Alines(oo,m.cchildspath,.F.,'.')
+nLevels = Alines(oo,m.cChildPath,.F.,'.')
 
 thispath = ''
 
@@ -331,50 +342,58 @@ For nlevel = 1 To m.nLevels
 
 	islastChild = nlevel = m.nLevels
 
-	If m.islastChild  And m.vtype # 'U'
-		Removeproperty(m.THISO,m.thisChild)
-		vtype = 'U'
-	Endif
-
 	Do Case
 
-	Case m.vtype = 'U'
+	Case !m.islastChild  And m.vtype # 'U' And m.vtype # 'O'
+		Error m.thispath+' is not an object'
+
+	Case !m.islastChild  And m.vtype = 'U'
+
+		AddProperty( m.thiso , m.thisChild , Createobject('empty') )
+
+	Case m.islastChild
+
+		Removeproperty(m.thiso,m.thisChild)
 
 		Try
 
-			If !m.islastChild
+			Do Case
+			Case aPathIsValid( m.vnewvalue , @carraypath )
 
-				AddProperty( m.THISO , m.thisChild , Createobject('empty') )
+				AddProperty(m.thiso,m.thisChild+'(1)',.Null.)
+				Acopy(m.vnewvalue.&carraypath,m.thiso.&thisChild)
 
-			Else
+			Case Type("m.vNewValue",1) = "A"
+				AddProperty( m.thiso , m.thisChild+'(1)',.Null. )
+				Acopy(m.vnewvalue, m.thiso.&thisChild)
 
-				If Type("m.vNewValue&cArraypath",1) = 'A'
+			Other
+				AddProperty( m.thiso , m.thisChild, m.vnewvalue )
 
-					AddProperty(m.THISO,m.thisChild+'(1)',.Null.)
-					Acopy(vNewvalue&cArrayPath,m.THISO.&thisChild)
-
-				Else
-
-					AddProperty( m.THISO , m.thisChild , m.vNewvalue )
-
-				Endif
-
-			Endif
+			Endcase
 
 
 		Catch
 
-			Error 'incorrect property Name: "'+m.thisChild+'" in '+m.thispath
+			Error 'incorrect property Name or value for "'+m.thisChild+'"'
 
 		Endtry
 
-	Case !m.islastChild And  m.vtype # 'O'
-		Error m.thispath+' is not an object'
 
 	Endcase
 
-	THISO  = m.THISO.&thisChild
+	thiso  = m.thiso.&thisChild
 
 Endfor
 
+*--------------------------------------------
+Function aPathIsValid( oSrc,cpath )
+*--------------------------------------------
+Local isValid
+
+cpath = Ltrim(m.cpath,1,'.')
+
+isValid = Vartype(m.oSrc) = 'O' And Vartype(m.cpath) = 'C' And !Empty(m.cpath) And Type('m.oSrc.'+m.cpath,1) = 'A'
+
+Return m.isValid
 

@@ -52,13 +52,13 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 		
 		.specs.add('First Item with key','testKey1')  && normal collection add()
 		
-		with .newItemFor('specs','memory')
+		with .newItem('specs','memory')
 			.type = 'DDR4'
 			.MAXSIZE = '64GB'
 			.slots = 4
 		endwith
 		
-		with .newItemFor('specs','usb')
+		with .newItem('specs','usb')
 			.internal = '3 @ PCIe 3.0 x2'
 			.front = 'x1 Type-C'
 			.rear  = 'x2 Type-A'
@@ -69,7 +69,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 
 	.storage = .newList()
 	
-	with .newItemFor( 'storage' )  && adding objects to list
+	with .newItem( 'storage' )  && adding objects to list
 		.manufacturer = 'Samsung'
 		.model = '960 evo Series'
 		.Type = 'internal'
@@ -77,7 +77,7 @@ With _( omypc )  && simply pass object you want to modify, any referenced proper
 		.capacity = '250gb'
 	Endwith
 
-	with .newItemFor( 'storage' )
+	with .newItem( 'storage' )
 		.manufacturer = 'Seagate'
 		.model = 'Barracuda ST3000DM008'
 		.Type = 'Internal'
