@@ -3,10 +3,10 @@
 
 ********************************
 
-Construct &amp; Model complex Visual Foxpro Objects*  adding properties, arrays and collections the easy way.  
+Add properties, arrays , array items, collections & collection items the clear and easy way.  
 Just make \_.prg available in your search path and start using it.  
 
-Construya y Modele objetos complejos de Visual Foxpro agregando propiedades, listas y colecciones de manera fácil.  
+Agregue propiedades, arrays, items a arrays, colecciones , items a colecciones de forma clara y fácil.
 Simplemente haga que \_.Prg esté disponible en la ruta de búsqueda y comience a usarlo.  
 
 **********************************
