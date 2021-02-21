@@ -1,8 +1,8 @@
 **************************************************************
-* Author: Marco Plaza, 2018
+* Author: Marco Plaza, 2018,2021
 * @nfoxProject, http://www.noVfp.com
 * nfTools https://github.com/nfTools
-* ver 1.1.9
+* ver 1.3.0
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
 * You are free to use, modify and include it in your compiled projects.
@@ -24,9 +24,11 @@
 *
 *	endwith
 *
+*	 .myArray = .acopy( @arraySource )
+*
 *	 .myList = .newList( [ Item1,Item2,... Item20 ] ) && creates a one dimension array, optional items to add
 *
-*	 .additems(  key-less collection name | array name , item1 [,item2,.. item20 ]) && adds multiple items to array/ key-less collection
+*	 .additems(  keyless collection name | array name , item1 [,item2,.. item20 ]) && adds multiple items to array/ keyless collection
 *
 *	 with .newItem( collection name | array name  [, collectionItemkey] ) && construct and add objects to array or collection with optional key
 *
@@ -73,7 +75,12 @@ Try
 
 		Do Case
 		Case Pcount() = 2
-			newpropertyvalue = Createobject('empty')
+			If Right(m.cnewobjectpath,1) = ')'
+				newpropertyvalue = .Null. && arrays can't have object as default value.
+			Else
+				newpropertyvalue = Createobject('empty')
+			Endif
+
 
 		Case Pcount() = 4
 
@@ -97,7 +104,6 @@ Try
 
 Catch To oerr
 
-	emessage = 'underscore ("_.prg"): '+oerr.message
 
 Endtry
 
@@ -134,6 +140,7 @@ Define Class nfset As Custom
 			'newcollection',;
 			'newitem',;
 			'newlist',;
+			'acopy',;
 			'__apush__',;
 			'__copytemp__',;
 			'__otarget__',;
@@ -242,16 +249,44 @@ Define Class nfset As Custom
 	AddProperty(m.ot,m.lp+'(1)')
 
 	If Pcount() > 0
+
 		Dimension This.__atemp__( Pcount() )
 		For np = 1 To Pcount()
 			This.__atemp__(m.np) =  Evaluate('p'+Transform(m.np))
 		Endfor
+
 		This.__passitems__ = .T.
-	Else
+
+	ELSE
+	
 		Dimension This.__atemp__(1)
 		This.__atemp__(1) = .Null.
 		This.__passitems__ = .F.
+
 	Endif
+
+	Return .Null.
+
+
+*-------------------------------------------------------------------------------------------------------
+	Procedure acopy( p1 )
+*-------------------------------------------------------------------------------------------------------
+	Local ot,lp,np
+
+	ot = This.__otarget__
+	lp = This.__lastproperty__
+	Removeproperty(m.ot,m.lp)
+	AddProperty(m.ot,m.lp+'(1)')
+
+	If Alen(p1,2) = 0
+		Dimension This.__atemp__(1)
+	Else
+		Dimension This.__atemp__(Alen(p1,1),Alen(p1,2))
+	Endif
+
+	acopy(p1,This.__atemp__)
+
+	This.__passitems__ = .T.
 
 	Return .Null.
 
@@ -294,7 +329,7 @@ Define Class nfset As Custom
 	m.o.&pname( m.uel ) =  m.vvalue
 
 *--------------------------------------
-	Procedure newCollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
+	Procedure newcollection(  p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20 )
 *--------------------------------------
 
 	Local ocol,nn
