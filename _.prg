@@ -2,7 +2,7 @@
 * Author: Marco Plaza, 2018,2021
 * @nfoxProject, http://www.noVfp.com
 * nfTools https://github.com/nfTools
-* ver 1.3.0
+* ver 1.3.1
 ****************************************************************************************
 * This program is part of nfTools, a support library for nFox.
 * You are free to use, modify and include it in your compiled projects.
@@ -100,10 +100,9 @@ Try
 		oobserver = .T.
 	Endif
 
-
-
 Catch To oerr
 
+	emessage = nf_errorh( oerr)
 
 Endtry
 
@@ -160,7 +159,16 @@ Define Class nfset As Custom
 
 	If !Pemstatus(This.__otarget__,m.pname,5)
 
-		AddProperty( This.__otarget__, m.pname, Createobject('empty') )
+		Local fail
+		Try
+			AddProperty( This.__otarget__, m.pname, Createobject('empty') )
+			fail = .F.
+		Catch
+			fail = .T.
+		Endtry
+		If m.fail
+			Error 'Incorrect property name "'+m.pname+'"'
+		Endif
 
 	Endif
 
@@ -257,8 +265,8 @@ Define Class nfset As Custom
 
 		This.__passitems__ = .T.
 
-	ELSE
-	
+	Else
+
 		Dimension This.__atemp__(1)
 		This.__atemp__(1) = .Null.
 		This.__passitems__ = .F.
@@ -269,14 +277,25 @@ Define Class nfset As Custom
 
 
 *-------------------------------------------------------------------------------------------------------
-	Procedure acopy( p1 )
+	Procedure Acopy( p1 )
 *-------------------------------------------------------------------------------------------------------
-	Local ot,lp,np
+	Local ot,lp,np,fail
 
 	ot = This.__otarget__
 	lp = This.__lastproperty__
 	Removeproperty(m.ot,m.lp)
-	AddProperty(m.ot,m.lp+'(1)')
+
+	Try
+		AddProperty(m.ot,m.lp+'(1)')
+		fail = .F.
+	Catch
+		fail = .T.
+	Endtry
+
+	If m.fail
+		Error 'Invalid array name: "'+m.lp+'"'
+		Return .Null.
+	Endif
 
 	If Alen(p1,2) = 0
 		Dimension This.__atemp__(1)
@@ -284,7 +303,7 @@ Define Class nfset As Custom
 		Dimension This.__atemp__(Alen(p1,1),Alen(p1,2))
 	Endif
 
-	acopy(p1,This.__atemp__)
+	Acopy(p1,This.__atemp__)
 
 	This.__passitems__ = .T.
 
@@ -377,20 +396,21 @@ For nlevel = 1 To m.nLevels
 
 	islastChild = nlevel = m.nLevels
 
-	Do Case
+	Try
 
-	Case !m.islastChild  And m.vtype # 'U' And m.vtype # 'O'
-		Error m.thispath+' is not an object'
+		Do Case
 
-	Case !m.islastChild  And m.vtype = 'U'
+		Case !m.islastChild  And m.vtype # 'U' And m.vtype # 'O'
+			Error m.thispath+' is not an object'
 
-		AddProperty( m.thiso , m.thisChild , Createobject('empty') )
+		Case !m.islastChild  And m.vtype = 'U'
 
-	Case m.islastChild
+			AddProperty( m.thiso , m.thisChild , Createobject('empty') )
 
-		Removeproperty(m.thiso,m.thisChild)
+		Case m.islastChild
 
-		Try
+			Removeproperty(m.thiso,m.thisChild)
+
 
 			Do Case
 			Case aPathIsValid( m.vnewvalue , @carraypath )
@@ -408,14 +428,13 @@ For nlevel = 1 To m.nLevels
 			Endcase
 
 
-		Catch
+		Endcase
 
-			Error 'incorrect property Name or value for "'+m.thisChild+'"'
+	Catch
 
-		Endtry
+		Error 'incorrect property Name or value for "'+m.cChildPath+'"'
 
-
-	Endcase
+	Endtry
 
 	thiso  = m.thiso.&thisChild
 
