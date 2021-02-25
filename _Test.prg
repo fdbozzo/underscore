@@ -6,6 +6,9 @@ public oCust, oMyPc
 
 oCust = createObject('empty')
 
+adir(fileslist)
+
+
 with _( m.oCust ,'.info.address.billing.phone')
 
 	.number = 2358811
@@ -18,6 +21,8 @@ endwith
 
 omypc = Createobject('empty')
 
+adir( filesList )
+
 With _( omypc )  && simply pass object you want to modify, any non-existent property will be added if does not exist:
 
 	.madeby = 'Marco Plaza, 2018 - nfTools'
@@ -25,6 +30,8 @@ With _( omypc )  && simply pass object you want to modify, any non-existent prop
 	.baseprice = 699
 	.casetype  = 'ATX'
 	.modelname = 'Ryzen Performance Plus'
+	
+	.myFiles	= .acopy( @filesList ) && array copy
 
 	With _( .cpu )   &&  ( oMyPc.cpu  ) 
 		.processorcount = 6
@@ -107,5 +114,7 @@ endwith
  ? oFiles.one.two.myFiles(1,1)
 
  ofiles2 = create('empty')
+ _( oFiles2, "thesame.in.other.filesList", m.oFiles.one.two,"myFiles" )
+ ? oFiles2.thesame.in.other.filesList(1,1)
  _( oFiles2, "thesame.in.other.node", m.oFiles, "one.two.myFiles" )
  ? oFiles2.thesame.in.other.node(1,1)
